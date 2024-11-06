@@ -1,4 +1,3 @@
-// src/components/Header.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -8,10 +7,10 @@ const BASE_URL = 'https://yts.mx/api/v2/';
 async function searchMovies(query) {
   try {
     const response = await axios.get(`${BASE_URL}list_movies.json?query_term=${query}`);
-    return response.data.data.movies; // Return the movie array
+    return response.data.data.movies; 
   } catch (error) {
     console.error('Error searching movies:', error);
-    return []; // Return an empty array in case of an error
+    return [];
   }
 }
 
@@ -32,14 +31,13 @@ function Header() {
   };
 
   const handleMovieClick = (movieId) => {
-    window.location.href = `/movie/${movieId}`; // Redirect to movie details page
+    window.location.href = `/movie/${movieId}`; // Redirecting to movie details page main code
   };
 
   return (
     <header className="bg-gray-900 text-white p-4 flex items-center justify-between">
       <div className="logo">
         <Link to="/">
-          {/* Update the logo path to the correct one in the media folder */}
           <img src="https://yts.mx/assets/images/website/logo-YTS.svg" alt="Logo" className="h-10" />
           </Link>
       </div>
@@ -55,7 +53,7 @@ function Header() {
             placeholder="Quick Search"
             aria-label="Search movies"
           />
-          {/* Dropdown for displaying search results */}
+          {/* Search ko dropdown */}
           {searchQuery && filteredMovies.length > 0 && (
             <div id="dropdown" className="absolute bg-gray-800 rounded-lg mt-2 w-full max-h-64 overflow-y-auto">
               {filteredMovies.map((movie) => (

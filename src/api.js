@@ -1,4 +1,3 @@
-// src/api.js
 import axios from 'axios';
 
 const BASE_URL = 'https://yts.mx/api/v2/';

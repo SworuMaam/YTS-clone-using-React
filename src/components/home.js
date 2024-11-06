@@ -1,4 +1,3 @@
-// src/components/Home.js
 import React, { useEffect, useState } from 'react';
 import { fetchMovies } from '../api';
 import { Link } from 'react-router-dom';
@@ -23,7 +22,6 @@ function Home() {
 
   return (
     <div className="space-y-8">
-      {/* Heading and Paragraph with provided content */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-100 mb-4">
           Download YTS YIFY movies: HD smallest size
@@ -66,7 +64,7 @@ const MovieList = ({ movies }) => (
           <img src={movie.medium_cover_image} alt={movie.title} className="w-full h-full object-cover rounded-md transition-all group-hover:opacity-70" />
         </Link>
         
-        {/* Hover effect covering entire card */}
+        {/* Hover hune part from here*/}
         <div className="absolute inset-0 bg-black bg-opacity-50 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center">
           <div className="text-center">
             <p className="text-white text-sm">Rating: {movie.rating}</p>
@@ -78,8 +76,9 @@ const MovieList = ({ movies }) => (
             </Link>
           </div>
         </div>
+        {/* Hover To here*/}
 
-        {/* Movie Title and Release Date (Below poster) */}
+
         <div className="p-4">
           <h3 className="text-lg font-semibold text-white">{movie.title}</h3>
           <p className="text-sm text-gray-400">{movie.year}</p>

@@ -1,4 +1,3 @@
-// src/components/Checkout.js
 import React, { useEffect, useState } from 'react';
 
 function Checkout() {
