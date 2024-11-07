@@ -7,7 +7,6 @@ import Checkout from './components/checkout';
 import Header from './components/header';
 import Footer from './components/footer';
 
-// Create a client instance for React Query
 const queryClient = new QueryClient();
 
 function App() {

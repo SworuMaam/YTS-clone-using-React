@@ -12,17 +12,14 @@ function Checkout() {
     loadCart();
   }, []);
 
-  // Load cart data from localStorage
   function loadCart() {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
     setCart(cartData);
 
-    // Calculate subtotal
     const subtotal = cartData.reduce((acc, item) => acc + parseFloat(item.price), 0);
     setSubTotal(subtotal);
   }
 
-  // Remove item from the cart
   function removeItem(index) {
     const updatedCart = [...cart];
     updatedCart.splice(index, 1);
@@ -37,7 +34,7 @@ function Checkout() {
         <section id="checkout" className="w-full max-w-5xl px-6">
           <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">Your Cart</h2>
           <div className="flex flex-col md:flex-row gap-8 justify-center">
-            {/* Cart Items Section */}
+
             <div className="w-full md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-medium text-gray-100 mb-4">Your Cart Items</h3>
               <div className="overflow-x-auto">
@@ -79,7 +76,6 @@ function Checkout() {
               </div>
             </div>
 
-            {/* Order Summary Section */}
             <div className="w-full md:w-1/3 bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-medium text-gray-100 mb-4">Order Summary</h3>
               <div className="space-y-4">
