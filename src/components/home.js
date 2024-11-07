@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { fetchMovies } from '../api';
 import { Link } from 'react-router-dom';
 import telegramIcon from './media/telegram.svg';
@@ -7,18 +8,20 @@ import twitterIcon from './media/twitter.svg';
 const BASE_URL = 'https://yts.mx/api/v2/';
 
 function Home() {
-  const [popularMovies, setPopularMovies] = useState([]);
-  const [latestMovies, setLatestMovies] = useState([]);
-  const [upcomingMovies, setUpcomingMovies] = useState([]);
+  const { data: popularMovies = [] } = useQuery({
+    queryKey: ['popularMovies'],
+    queryFn: () => fetchMovies(`${BASE_URL}list_movies.json?sort_by=downloads&order_by=desc`),
+  });
 
-  useEffect(() => {
-    async function loadMovies() {
-      setPopularMovies(await fetchMovies(`${BASE_URL}list_movies.json?sort_by=downloads&order_by=desc`));
-      setLatestMovies(await fetchMovies(`${BASE_URL}list_movies.json?sort_by=year&order_by=desc`));
-      setUpcomingMovies(await fetchMovies(`${BASE_URL}list_movies.json?sort_by=year&order_by=asc`));
-    }
-    loadMovies();
-  }, []);
+  const { data: latestMovies = [] } = useQuery({
+    queryKey: ['latestMovies'],
+    queryFn: () => fetchMovies(`${BASE_URL}list_movies.json?sort_by=year&order_by=desc`),
+  });
+
+  const { data: upcomingMovies = [] } = useQuery({
+    queryKey: ['upcomingMovies'],
+    queryFn: () => fetchMovies(`${BASE_URL}list_movies.json?sort_by=year&order_by=asc`),
+  });
 
   return (
     <div className="space-y-8">
@@ -36,12 +39,13 @@ function Home() {
           </a>
           <br /><br />
           <div className="flex items-center justify-center space-x-2">
-      <img src={telegramIcon} width="16" height="16" alt="Telegram" />
-      <a href="#telegram" className="text-blue-400 hover:underline"> YTSMX_UPDATES </a>
-      <span className="text-white">|</span>
-      <img src={twitterIcon} width="16" height="16" alt="Twitter" />
-      <a href="#twitter" className="text-blue-400 hover:underline"> Follow @YTSYIFY for upcoming featured movies!</a>
-    </div> </p>
+            <img src={telegramIcon} width="16" height="16" alt="Telegram" />
+            <a href="#telegram" className="text-blue-400 hover:underline"> YTSMX_UPDATES </a>
+            <span className="text-white">|</span>
+            <img src={twitterIcon} width="16" height="16" alt="Twitter" />
+            <a href="#twitter" className="text-blue-400 hover:underline"> Follow @YTSYIFY for upcoming featured movies!</a>
+          </div> 
+        </p>
       </div>
 
       <h2 className="text-2xl font-bold text-gray-100 mb-2">Popular Movies</h2>
@@ -64,7 +68,6 @@ const MovieList = ({ movies }) => (
           <img src={movie.medium_cover_image} alt={movie.title} className="w-full h-full object-cover rounded-md transition-all group-hover:opacity-70" />
         </Link>
         
-        {/* Hover hune part from here*/}
         <div className="absolute inset-0 bg-black bg-opacity-50 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center">
           <div className="text-center">
             <p className="text-white text-sm">Rating: {movie.rating}</p>
@@ -76,8 +79,6 @@ const MovieList = ({ movies }) => (
             </Link>
           </div>
         </div>
-        {/* Hover To here*/}
-
 
         <div className="p-4">
           <h3 className="text-lg font-semibold text-white">{movie.title}</h3>

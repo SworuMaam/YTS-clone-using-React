@@ -1,39 +1,101 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 const BASE_URL = 'https://yts.mx/api/v2/';
 
+const fetchMovieDetails = async (id) => {
+  const response = await axios.get(`${BASE_URL}movie_details.json?movie_id=${id}`);
+  return response.data.data.movie;
+};
+
+const generateRandomPrice = (min = 100, max = 500) => {
+  return (Math.random() * (max - min) + min).toFixed(2);
+};
+
 function MovieDetails() {
   const { id } = useParams();
-  const [movie, setMovie] = useState(null);
+  const navigate = useNavigate();
+  const [price, setPrice] = useState(null);
+
+  const { data: movie, isLoading, error } = useQuery({
+    queryKey: ['movieDetails', id],
+    queryFn: () => fetchMovieDetails(id),
+    staleTime: 5 * 60 * 1000,
+  });
 
   useEffect(() => {
-    async function fetchMovie() {
-      try {
-        const response = await axios.get(`${BASE_URL}movie_details.json?movie_id=${id}`);
-        setMovie(response.data.data.movie);
-      } catch (error) {
-        console.error("Error fetching movie details:", error);
+    if (movie) {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const movieInCart = cart.find(item => item.id === movie.id);
+
+      if (movieInCart && movieInCart.price) {
+        setPrice(movieInCart.price);
+      } else {
+        setPrice(generateRandomPrice());
       }
     }
-    fetchMovie();
-  }, [id]);
+  }, [movie]);
+
+  const handleAddToCart = () => {
+    if (!movie) return;
+
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const movieExists = cart.some(item => item.id === movie.id);
+
+    if (movieExists) {
+      alert('Movie is already in cart');
+    } else {
+      const randomPrice = price || generateRandomPrice();
+
+      cart.push({
+        id: movie.id,
+        title: movie.title,
+        price: randomPrice,
+        poster: movie.medium_cover_image,
+      });
+      localStorage.setItem('cart', JSON.stringify(cart));
+
+      navigate('/checkout');
+    }
+  };
+
+  if (isLoading) return <p className="text-center text-gray-100">Loading...</p>;
+  if (error) return <p className="text-center text-red-500">Error fetching movie details</p>;
 
   return (
     movie ? (
-      <div className="container mx-auto p-6 max-w-3xl">
-        <h1 className="text-3xl font-bold text-gray-100 mb-4">{movie.title}</h1>
-        <img src={movie.medium_cover_image} alt={movie.title} className="rounded-lg mb-4" />
-        <p className="text-gray-300 mb-4">{movie.description_full}</p>
-        <p className="text-gray-300"><strong>Rating:</strong> {movie.rating}</p>
-        <p className="text-gray-300"><strong>Genres:</strong> {movie.genres.join(", ")}</p>
-        <button className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-          Add to Cart
-        </button>
+      <div className="container mx-auto p-6 max-w-3xl bg-gray-900 text-white">
+        <div className="flex space-x-8">
+          {/* Image and Title/Subtitle Section */}
+          <div className="flex flex-col items-center space-y-4" style={{ width: '200px' }}>
+            {movie.medium_cover_image ? (
+              <img src={movie.medium_cover_image} alt={movie.title} className="rounded-lg w-48 h-72 object-cover" />
+            ) : (
+              <p className="text-center text-gray-400">Image not available</p>
+            )}
+            <h1 className="text-2xl font-bold text-gray-100 text-center">{movie.title || "Title Not Available"}</h1>
+          </div>
+
+          {/* Movie Details Section */}
+          <div className="flex flex-col space-y-4 flex-1">
+            <p className="text-gray-300">{movie.description_full || "Description not available."}</p>
+            <p className="text-gray-300"><strong>Rating:</strong> {movie.rating || "N/A"}</p>
+            <p className="text-gray-300"><strong>Genres:</strong> {movie.genres?.join(", ") || "N/A"}</p>
+            <p className="text-gray-300"><strong>Price:</strong> Rs {price}</p>
+
+            {/* Add to Cart Button */}
+            <button 
+              className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 self-start" 
+              onClick={handleAddToCart}>
+              Add to Cart
+            </button>
+          </div>
+        </div>
       </div>
     ) : (
-      <p className="text-center text-gray-100">Loading...</p>
+      <p className="text-center text-gray-100">Movie details not found.</p>
     )
   );
 }
