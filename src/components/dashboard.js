@@ -1,43 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { auth } from '../firebaseConfig';
+// src/components/Dashboard.js
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-
-const db = getFirestore();
+import { auth } from '../firebaseConfig';
+import { useUser } from '../UserContext';  // Import useUser hook
 
 function Dashboard() {
-  const [username, setUsername] = useState('');
+  const { user, setUser } = useUser();  // Access context values
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (auth.currentUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', auth.currentUser.email));
-          if (userDoc.exists()) {
-            setUsername(userDoc.data().username); 
-          } else {
-            console.log("User document not found");
-          }
-        } catch (error) {
-          console.error("Error fetching user details: ", error);
-        }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
       } else {
         navigate('/login');
       }
-    };
+    });
 
-    fetchUserDetails();
-  }, [navigate]);
+    return () => unsubscribe();
+  }, [setUser, navigate]);
+
+  const handleLogout = async () => {
+    await auth.signOut();
+    setUser(null);
+    navigate('/login');
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-700 text-white">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg text-center">
-        <h2 className="text-4xl font-bold mb-6">Welcome, {username ? username : 'User'}!</h2>
-        <p className="text-lg mb-8">You're logged in with the email: <span className="font-semibold">{auth.currentUser.email}</span></p>
-        <div className="bg-gray-700 text-white p-4 rounded-lg shadow-md">
-          <p className="text-xl font-semibold">Enjoy exploring your dashboard.</p>
-        </div>
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-white mb-6 text-center">Dashboard</h2>
+        {user ? (
+          <div>
+            <p className="text-white mb-4">Welcome, {user.email}</p>
+            
+          </div>
+        ) : (
+          <p className="text-white">Loading...</p>
+        )}
       </div>
     </div>
   );
