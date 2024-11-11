@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { auth } from '../firebaseConfig'; 
+import { signOut } from 'firebase/auth'; 
 import axios from 'axios';
 
 const BASE_URL = 'https://yts.mx/api/v2/';
@@ -7,7 +9,7 @@ const BASE_URL = 'https://yts.mx/api/v2/';
 async function searchMovies(query) {
   try {
     const response = await axios.get(`${BASE_URL}list_movies.json?query_term=${query}`);
-    return response.data.data.movies; 
+    return response.data.data.movies;
   } catch (error) {
     console.error('Error searching movies:', error);
     return [];
@@ -17,6 +19,20 @@ async function searchMovies(query) {
 function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMovies, setFilteredMovies] = useState([]);
+  const [user, setUser] = useState(null); 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser); 
+      } else {
+        setUser(null); 
+      }
+    });
+
+    return () => unsubscribe(); 
+  }, []);
 
   const handleSearchChange = async (e) => {
     const query = e.target.value;
@@ -31,7 +47,16 @@ function Header() {
   };
 
   const handleMovieClick = (movieId) => {
-    window.location.href = `/movie/${movieId}`; // Redirecting to movie details page main code
+    window.location.href = `/movie/${movieId}`; 
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); 
+      navigate('/'); 
+    } catch (error) {
+      console.error('Logout failed:', error.message); 
+    }
   };
 
   return (
@@ -39,7 +64,7 @@ function Header() {
       <div className="logo">
         <Link to="/">
           <img src="https://yts.mx/assets/images/website/logo-YTS.svg" alt="Logo" className="h-10" />
-          </Link>
+        </Link>
       </div>
 
       <nav className="flex space-x-4">
@@ -53,7 +78,6 @@ function Header() {
             placeholder="Quick Search"
             aria-label="Search movies"
           />
-          {/* Search ko dropdown */}
           {searchQuery && filteredMovies.length > 0 && (
             <div id="dropdown" className="absolute bg-gray-800 rounded-lg mt-2 w-full max-h-64 overflow-y-auto">
               {filteredMovies.map((movie) => (
@@ -78,9 +102,22 @@ function Header() {
         </ul>
 
         <ul className="flex space-x-2 text-white">
-          <li><a href="#login" className="hover:text-green-400">Login</a></li>
-          <li>|</li>
-          <li><a href="#register" className="hover:text-green-400">Register</a></li>
+          {user ? (
+            <>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <li><Link to="/login" className="hover:text-green-400">Login</Link></li>
+              <li>|</li>
+              <li><Link to="/register" className="hover:text-green-400">Register</Link></li>
+            </>
+          )}
         </ul>
       </nav>
     </header>
