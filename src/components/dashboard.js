@@ -1,11 +1,10 @@
-// src/components/Dashboard.js
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebaseConfig';
-import { useUser } from '../UserContext';  // Import useUser hook
+import { useUser } from '../UserContext';
 
 function Dashboard() {
-  const { user, setUser } = useUser();  // Access context values
+  const { user, setUser } = useUser(); 
   const navigate = useNavigate();
 
   useEffect(() => {
