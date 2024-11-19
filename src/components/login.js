@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useDispatch } from 'react-redux';
+import { login } from '../features/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const {
     register,
@@ -18,7 +21,10 @@ function Login() {
     const { email, password } = data;
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      dispatch(login({ uid: user.uid, email: user.email })); 
       navigate('/dashboard');
     } catch (error) {
       if (error.code === 'auth/wrong-password') {
@@ -72,7 +78,6 @@ function Login() {
             Login
           </button>
         </form>
-
         <div className="mt-4 text-center">
           <p className="text-white">Don't have an account?</p>
           <button
@@ -81,8 +86,7 @@ function Login() {
           >
             Register
           </button>
-        </div>
-      </div>
+        </div>      </div>
     </div>
   );
 }

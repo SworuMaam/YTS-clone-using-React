@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../firebaseConfig'; 
-import { signOut } from 'firebase/auth'; 
+import { Link } from 'react-router-dom';
+import { auth } from '../firebaseConfig';
 import axios from 'axios';
+import cartIcon from '../cart.png'; // Import your cart icon from the src folder
 
 const BASE_URL = 'https://yts.mx/api/v2/';
 
@@ -19,19 +19,24 @@ async function searchMovies(query) {
 function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMovies, setFilteredMovies] = useState([]);
-  const [user, setUser] = useState(null); 
-  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0); // Track the number of items in the cart
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
-        setUser(currentUser); 
+        setUser(currentUser);
       } else {
-        setUser(null); 
+        setUser(null);
       }
     });
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const cartData = JSON.parse(localStorage.getItem('cart')) || [];
+    setCartCount(cartData.length); // Update the cart item count
   }, []);
 
   const handleSearchChange = async (e) => {
@@ -47,16 +52,7 @@ function Header() {
   };
 
   const handleMovieClick = (movieId) => {
-    window.location.href = `/movie/${movieId}`; 
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth); 
-      navigate('/'); 
-    } catch (error) {
-      console.error('Logout failed:', error.message); 
-    }
+    window.location.href = `/movie/${movieId}`;
   };
 
   return (
@@ -67,7 +63,7 @@ function Header() {
         </Link>
       </div>
 
-      <nav className="flex space-x-4">
+      <nav className="flex items-center space-x-4 w-full justify-end">
         <div className="search-bar relative">
           <input
             type="text"
@@ -101,16 +97,13 @@ function Header() {
           <li><a href="#browse" className="hover:text-green-400">Browse Movies</a></li>
         </ul>
 
-        <ul className="flex space-x-2 text-white">
+        <ul className="flex items-center space-x-4">
           {user ? (
-            <>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200"
-              >
-                Logout
-              </button>
-            </>
+            <li>
+              <Link to="/dashboard" className="hover:text-green-400 text-white">
+                Dashboard
+              </Link>
+            </li>
           ) : (
             <>
               <li><Link to="/login" className="hover:text-green-400">Login</Link></li>
@@ -118,6 +111,18 @@ function Header() {
               <li><Link to="/register" className="hover:text-green-400">Register</Link></li>
             </>
           )}
+
+          {/* Cart icon with item count */}
+          <li>
+            <Link to="/checkout" className="relative">
+              <img src={cartIcon} alt="Cart" className="h-10 w-10" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>

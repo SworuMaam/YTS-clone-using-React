@@ -4,7 +4,7 @@ import { auth } from '../firebaseConfig';
 import { useUser } from '../UserContext';
 
 function Dashboard() {
-  const { user, setUser } = useUser(); 
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,7 +32,12 @@ function Dashboard() {
         {user ? (
           <div>
             <p className="text-white mb-4">Welcome, {user.email}</p>
-            
+            <button
+              onClick={handleLogout}
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition duration-200"
+            >
+              Logout
+            </button>
           </div>
         ) : (
           <p className="text-white">Loading...</p>

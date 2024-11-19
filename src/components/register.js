@@ -20,12 +20,12 @@ function Register() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigate('/dashboard');
+        navigate('/dashboard'); 
       }
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate]); 
 
   const onSubmit = async (data) => {
     const { email, password, username, phone } = data;
@@ -40,7 +40,7 @@ function Register() {
         email,
       });
 
-      navigate('/dashboard');
+      navigate('/dashboard'); 
     } catch (error) {
       setError(error.message);
     }
