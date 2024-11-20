@@ -8,7 +8,6 @@ import twitterIcon from './media/twitter.svg';
 const BASE_URL = 'https://yts.mx/api/v2/';
 
 function Home() {
-  // Fetch popular, latest, and upcoming movies using react-query
   const { data: popularMovies = [] } = useQuery({
     queryKey: ['popularMovies'],
     queryFn: () => fetchMovies(`${BASE_URL}list_movies.json?sort_by=downloads&order_by=desc`),
@@ -26,7 +25,6 @@ function Home() {
 
   return (
     <div className="space-y-8 px-4 md:px-8 lg:px-16">
-      {/* Intro Section */}
       <div className="text-center">
         <h1 className="text-2xl md:text-4xl font-bold text-gray-100 mb-4">
           Download YTS YIFY movies: HD smallest size
@@ -50,7 +48,6 @@ function Home() {
         </p>
       </div>
 
-      {/* Movie Categories */}
       <h2 className="text-xl md:text-2xl font-bold text-gray-100 mb-2">Popular Movies</h2>
       <MovieList movies={popularMovies} />
 
@@ -63,7 +60,6 @@ function Home() {
   );
 }
 
-// MovieList Component for displaying each movie category
 const MovieList = ({ movies }) => (
   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
     {movies.map(movie => (
@@ -81,7 +77,6 @@ const MovieList = ({ movies }) => (
           </div>
         </Link>
 
-        {/* Overlay for displaying rating and genres */}
         <div className="absolute inset-0 bg-black bg-opacity-50 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center">
           <div className="text-center">
             <p className="text-white text-xs md:text-sm">Rating: {movie.rating}</p>
@@ -94,7 +89,6 @@ const MovieList = ({ movies }) => (
           </div>
         </div>
 
-        {/* Title and Year */}
         <div className="p-4">
           <h3 className="text-sm md:text-lg font-semibold text-white">{movie.title}</h3>
           <p className="text-xs md:text-sm text-gray-400">{movie.year}</p>

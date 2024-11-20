@@ -30,9 +30,9 @@ function App() {
     <UserProvider value={user}>
       <QueryClientProvider client={queryClient}>
         <Router>
-          <div className="bg-gray-800 min-h-screen text-gray-100">
+          <div className="flex flex-col min-h-screen bg-gray-800 text-gray-100">
             <Header />
-            <main className="container mx-auto px-4 py-6">
+            <main className="flex-grow container mx-auto px-4 py-6">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/movie/:id" element={<MovieDetails />} />

@@ -1,31 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setCart, removeFromCart } from '../features/cartSlice';
 
 function Checkout() {
-  const [cart, setCart] = useState([]);
-  const [subTotal, setSubTotal] = useState(0);
-  const deliveryFee = 20.00;
-  const serviceCharge = 10.00;
-  const discount = subTotal > 1000 ? 100.00 : 0.00;
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+  const subTotal = cart.reduce((acc, item) => {
+    const price = parseFloat(item.price);
+    const quantity = item.quantity || 1;
+    return acc + (isNaN(price) ? 0 : price * quantity);
+  }, 0);
+
+  const deliveryFee = 20.0;
+  const serviceCharge = 10.0;
+  const discount = subTotal > 1000 ? 100.0 : 0.0;
   const grandTotal = subTotal + deliveryFee + serviceCharge - discount;
 
   useEffect(() => {
-    loadCart();
-  }, []);
-
-  function loadCart() {
     const cartData = JSON.parse(localStorage.getItem('cart')) || [];
-    setCart(cartData);
+    dispatch(setCart(cartData));
+  }, [dispatch]);
 
-    const subtotal = cartData.reduce((acc, item) => acc + parseFloat(item.price), 0);
-    setSubTotal(subtotal);
-  }
-
-  function removeItem(index) {
-    const updatedCart = [...cart];
-    updatedCart.splice(index, 1);
-    setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    loadCart();
+  function handleRemove(index) {
+    const itemToRemove = cart[index];
+    dispatch(removeFromCart(itemToRemove));
   }
 
   return (
@@ -34,7 +32,6 @@ function Checkout() {
         <section id="checkout" className="w-full max-w-5xl px-6">
           <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">Your Cart</h2>
           <div className="flex flex-col md:flex-row gap-8 justify-center">
-
             <div className="w-full md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-medium text-gray-100 mb-4">Your Cart Items</h3>
               <div className="overflow-x-auto">
@@ -63,7 +60,7 @@ function Checkout() {
                           <td className="px-4 py-2">
                             <button
                               className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                              onClick={() => removeItem(index)}
+                              onClick={() => handleRemove(index)}
                             >
                               Remove
                             </button>
@@ -105,7 +102,7 @@ function Checkout() {
                       <td colSpan="2" className="px-4 py-4">
                         <button
                           className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600"
-                          onClick={() => alert("Proceeding to checkout...")}
+                          onClick={() => alert('Proceeding to checkout...')}
                         >
                           Proceed to Checkout
                         </button>

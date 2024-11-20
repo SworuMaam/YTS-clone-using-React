@@ -12,7 +12,7 @@ function Dashboard() {
       if (user) {
         setUser(user);
       } else {
-        navigate('/login');
+        navigate('/');
       }
     });
 
@@ -22,7 +22,7 @@ function Dashboard() {
   const handleLogout = async () => {
     await auth.signOut();
     setUser(null);
-    navigate('/login');
+    navigate('/');
   };
 
   return (

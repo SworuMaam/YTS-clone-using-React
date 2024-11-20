@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux'; 
 import { auth } from '../firebaseConfig';
 import axios from 'axios';
-import cartIcon from '../cart.png'; // Import your cart icon from the src folder
+import cartIcon from '../cart.png'; 
 
 const BASE_URL = 'https://yts.mx/api/v2/';
 
@@ -20,7 +21,8 @@ function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMovies, setFilteredMovies] = useState([]);
   const [user, setUser] = useState(null);
-  const [cartCount, setCartCount] = useState(0); // Track the number of items in the cart
+  const cart = useSelector((state) => state.cart.items); 
+  const cartCount = cart.reduce((total, item) => total + (item.quantity || 1), 0); 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -32,11 +34,6 @@ function Header() {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const cartData = JSON.parse(localStorage.getItem('cart')) || [];
-    setCartCount(cartData.length); // Update the cart item count
   }, []);
 
   const handleSearchChange = async (e) => {
@@ -98,12 +95,25 @@ function Header() {
         </ul>
 
         <ul className="flex items-center space-x-4">
+
+        
+
           {user ? (
-            <li>
+            <li className="flex items-center space-x-4">
               <Link to="/dashboard" className="hover:text-green-400 text-white">
                 Dashboard
+              </Link> &nbsp;
+            
+              <Link to="/checkout" className="relative">
+                <img src={cartIcon} alt="Cart" className="h-8 w-8" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-4 left-3/2 transform -translate-x-1/2 bg-red-500 text-white text-xs rounded-full px-2 py-1 flex items-center justify-center w-5 h-5 text-center">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
-            </li>
+           </li>
+
           ) : (
             <>
               <li><Link to="/login" className="hover:text-green-400">Login</Link></li>
@@ -112,17 +122,7 @@ function Header() {
             </>
           )}
 
-          {/* Cart icon with item count */}
-          <li>
-            <Link to="/checkout" className="relative">
-              <img src={cartIcon} alt="Cart" className="h-10 w-10" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-          </li>
+          
         </ul>
       </nav>
     </header>

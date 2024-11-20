@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { useSelector } from 'react-redux';  
 
 const BASE_URL = 'https://yts.mx/api/v2/';
 
@@ -19,6 +20,7 @@ function MovieDetails() {
   const navigate = useNavigate();
   const [price, setPrice] = useState(null);
 
+  const { user } = useSelector((state) => state.auth);  
   const { data: movie, isLoading, error } = useQuery({
     queryKey: ['movieDetails', id],
     queryFn: () => fetchMovieDetails(id),
@@ -41,11 +43,19 @@ function MovieDetails() {
   const handleAddToCart = () => {
     if (!movie) return;
 
+    if (!user) {  
+      const confirmLogin = window.confirm('Not logged in. Do you want to log in?');  
+      if (confirmLogin) {
+        navigate('/login');
+      }
+      return;
+    }
+
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const movieExists = cart.some(item => item.id === movie.id);
 
     if (movieExists) {
-      alert('Movie is already in cart');
+      alert('Movie is already in cart');  
     } else {
       const randomPrice = price || generateRandomPrice();
 
@@ -57,7 +67,7 @@ function MovieDetails() {
       });
       localStorage.setItem('cart', JSON.stringify(cart));
 
-      navigate('/checkout');
+      navigate('/checkout');  
     }
   };
 
