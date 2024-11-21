@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { useSelector } from 'react-redux';  
+import { useSelector, useDispatch } from 'react-redux';  
+import { addToCart } from '../features/cartSlice';
 
 const BASE_URL = 'https://yts.mx/api/v2/';
 
@@ -18,6 +19,7 @@ const generateRandomPrice = (min = 100, max = 500) => {
 function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [price, setPrice] = useState(null);
 
   const { user } = useSelector((state) => state.auth);  
@@ -29,14 +31,7 @@ function MovieDetails() {
 
   useEffect(() => {
     if (movie) {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const movieInCart = cart.find(item => item.id === movie.id);
-
-      if (movieInCart && movieInCart.price) {
-        setPrice(movieInCart.price);
-      } else {
-        setPrice(generateRandomPrice());
-      }
+      setPrice(generateRandomPrice());
     }
   }, [movie]);
 
@@ -51,24 +46,18 @@ function MovieDetails() {
       return;
     }
 
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const movieExists = cart.some(item => item.id === movie.id);
+    const randomPrice = price || generateRandomPrice();
 
-    if (movieExists) {
-      alert('Movie is already in cart');  
-    } else {
-      const randomPrice = price || generateRandomPrice();
+    const cartItem = {
+      id: movie.id,
+      title: movie.title,
+      price: randomPrice,
+      poster: movie.medium_cover_image,
+    };
 
-      cart.push({
-        id: movie.id,
-        title: movie.title,
-        price: randomPrice,
-        poster: movie.medium_cover_image,
-      });
-      localStorage.setItem('cart', JSON.stringify(cart));
+    dispatch(addToCart(cartItem)); 
 
-      navigate('/checkout');  
-    }
+    navigate('/checkout');
   };
 
   if (isLoading) return <p className="text-center text-gray-100">Loading...</p>;

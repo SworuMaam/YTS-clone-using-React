@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux'; 
+import { useSelector, useDispatch } from 'react-redux';
 import { auth } from '../firebaseConfig';
 import axios from 'axios';
-import cartIcon from '../cart.png'; 
+import { setCart } from '../features/cartSlice';
+import cartIcon from './media/cart.png';
 
 const BASE_URL = 'https://yts.mx/api/v2/';
 
@@ -21,20 +22,23 @@ function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMovies, setFilteredMovies] = useState([]);
   const [user, setUser] = useState(null);
-  const cart = useSelector((state) => state.cart.items); 
-  const cartCount = cart.reduce((total, item) => total + (item.quantity || 1), 0); 
+  const dispatch = useDispatch(); 
+  const cart = useSelector((state) => state.cart.items);
+  const cartCount = cart.reduce((total, item) => total + (item.quantity || 1), 0);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
         setUser(currentUser);
+        const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+        dispatch(setCart(savedCart));
       } else {
         setUser(null);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [dispatch]);
 
   const handleSearchChange = async (e) => {
     const query = e.target.value;
@@ -95,15 +99,12 @@ function Header() {
         </ul>
 
         <ul className="flex items-center space-x-4">
-
-        
-
           {user ? (
             <li className="flex items-center space-x-4">
               <Link to="/dashboard" className="hover:text-green-400 text-white">
                 Dashboard
               </Link> &nbsp;
-            
+
               <Link to="/checkout" className="relative">
                 <img src={cartIcon} alt="Cart" className="h-8 w-8" />
                 {cartCount > 0 && (
@@ -112,8 +113,7 @@ function Header() {
                   </span>
                 )}
               </Link>
-           </li>
-
+            </li>
           ) : (
             <>
               <li><Link to="/login" className="hover:text-green-400">Login</Link></li>
@@ -121,8 +121,6 @@ function Header() {
               <li><Link to="/register" className="hover:text-green-400">Register</Link></li>
             </>
           )}
-
-          
         </ul>
       </nav>
     </header>

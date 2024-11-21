@@ -5,15 +5,17 @@ import { setCart, removeFromCart } from '../features/cartSlice';
 function Checkout() {
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.items);
+
   const subTotal = cart.reduce((acc, item) => {
     const price = parseFloat(item.price);
-    const quantity = item.quantity || 1;
+    const quantity = item.quantity || 1; 
     return acc + (isNaN(price) ? 0 : price * quantity);
   }, 0);
 
   const deliveryFee = 20.0;
   const serviceCharge = 10.0;
   const discount = subTotal > 1000 ? 100.0 : 0.0;
+
   const grandTotal = subTotal + deliveryFee + serviceCharge - discount;
 
   useEffect(() => {
@@ -21,9 +23,8 @@ function Checkout() {
     dispatch(setCart(cartData));
   }, [dispatch]);
 
-  function handleRemove(index) {
-    const itemToRemove = cart[index];
-    dispatch(removeFromCart(itemToRemove));
+  function handleRemove(itemId) {
+    dispatch(removeFromCart({ id: itemId })); 
   }
 
   return (
@@ -32,6 +33,7 @@ function Checkout() {
         <section id="checkout" className="w-full max-w-5xl px-6">
           <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">Your Cart</h2>
           <div className="flex flex-col md:flex-row gap-8 justify-center">
+
             <div className="w-full md:w-1/2 bg-gray-800 p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-medium text-gray-100 mb-4">Your Cart Items</h3>
               <div className="overflow-x-auto">
@@ -50,8 +52,8 @@ function Checkout() {
                         <td colSpan="4" className="text-center text-gray-500 py-4">Your cart is empty.</td>
                       </tr>
                     ) : (
-                      cart.map((item, index) => (
-                        <tr key={index} className="border-b border-gray-700">
+                      cart.map((item) => (
+                        <tr key={item.id} className="border-b border-gray-700">
                           <td className="px-4 py-2">
                             <img src={item.poster} alt={item.title} className="w-12 rounded-md" />
                           </td>
@@ -60,7 +62,7 @@ function Checkout() {
                           <td className="px-4 py-2">
                             <button
                               className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                              onClick={() => handleRemove(index)}
+                              onClick={() => handleRemove(item.id)}
                             >
                               Remove
                             </button>
@@ -94,23 +96,13 @@ function Checkout() {
                       <td className="px-4 py-2 text-left">Discount:</td>
                       <td className="px-4 py-2 text-right">Rs {discount.toFixed(2)}</td>
                     </tr>
-                    <tr className="border-b border-gray-700 font-semibold">
-                      <td className="px-4 py-2 text-left">Grand Total:</td>
-                      <td className="px-4 py-2 text-right">Rs {grandTotal.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td colSpan="2" className="px-4 py-4">
-                        <button
-                          className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600"
-                          onClick={() => alert('Proceeding to checkout...')}
-                        >
-                          Proceed to Checkout
-                        </button>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
+                <h3 className="text-lg font-semibold text-gray-100 text-center">Grand Total: Rs {grandTotal.toFixed(2)}</h3>
               </div>
+              <button className="mt-6 w-full px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                Proceed to Checkout
+              </button>
             </div>
           </div>
         </section>
